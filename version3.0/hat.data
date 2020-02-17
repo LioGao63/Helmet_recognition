@@ -1,0 +1,4 @@
+classes=2
+train=train.txt
+valid=test.txt
+names=hat.names
