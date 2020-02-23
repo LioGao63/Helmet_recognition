@@ -8,7 +8,7 @@ from PyQt5.QtCore import *
 from face_recog import face_rec
 from ui_camerapage import Ui_CameraPage
 from ui_faceCollection import Ui_faceCollection
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 import sys
 from sys import platform
 
@@ -56,8 +56,9 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
         try:
             fname, _ = QFileDialog.getOpenFileName(self, '打开视频', '/', 'Video files(*.mp4 *.avi *.mov *.rmvb)')
             print(fname)
-            self.cameraLabel.setPixmap(QPixmap(self.show_camera(fname)))
-            # self.show_camera(fname)
+
+            #self.cameraLabel.setPixmap(QPixmap(self.show_camera(fname)))
+            self.show_camera(fname)
         except:
             self.cameraLabel.setText("打开视频失败，可能是文件类型错误")
 
@@ -119,6 +120,7 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
 
         t0 = time.time()
         t_start = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
+
         for path, img, im0s, vid_cap in dataset:
             t = time.time()
 
@@ -186,10 +188,8 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
                     show = cv2.resize(im0, (800, 640))
                     show = cv2.cvtColor(show, cv2.COLOR_BGR2RGB)
                     showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
-
-
-
                     self.cameraLabel.setPixmap(QPixmap.fromImage(showImage))
+
 
                 # 保存结果（图片）
                 if save_img:
@@ -214,20 +214,27 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
             if platform == 'darwin':  # MacOS
                 os.system('open ' + out + ' ' + save_path)
 
+
+        self.face.moveToThread(self.facethread)
+        self.face.finish_signal.connect(self.facethread.quit)
+        self.facethread.started.connect(self.face.facerec_pic)
+        self.facethread.start()
+        print("识别线程开启")
         print('Done. (%.3fs)' % (time.time() - t0))
+
 
     # 打开关闭摄像头控制
     def slotCameraButton(self):
         if self.timer_camera.isActive() == False:
 
     #打开摄像头并显示图像信息
-            self.openCamera()
+            self.openCamera1()
         else:
     # 关闭摄像头并清空显示信息
             self.closeCamera()
 
     # 打开摄像头
-    def openCamera(self):
+    def openCamera1(self):
         flag = self.cap.open(self.CAM_NUM)
 
         if flag == False:
@@ -246,12 +253,12 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
         self.cameraLabel.clear()
         self.cameraButton.setText('打开摄像头')
 
-    #人脸识别模块
-    def face(self):
-        face_rec.facerec()
-
-    def collect(self):
-        face_rec.collect_face()
+    # #人脸识别模块
+    # def face(self):
+    #     face_rec.facerec()
+    #
+    # def collect(self):
+    #     face_rec.collect_face()
 
 
 class FaceCollectionWindow(QDialog, Ui_faceCollection):
@@ -277,7 +284,7 @@ class FaceCollectionWindow(QDialog, Ui_faceCollection):
 
             self.label.setPixmap(QPixmap(faceImageName).scaled(self.label.width(), self.label.height()))
         except:
-            self.label.setText("打开文件失败，可能是文件内型错误")
+            self.label.setText("打开文件失败，可能是文件类型错误")
 
     def submit(self):
         print(faceImageName)
@@ -296,7 +303,7 @@ class FaceCollectionWindow(QDialog, Ui_faceCollection):
             print(file_suffix)
             # 拼接图片名（包含路径）
             filename = '{}{}{}{}'.format(output_dir, os.sep, rename, file_suffix)
-            print(filename)
+            print(type(filename))
             img = self.label.pixmap().toImage()
             # 保存到文件夹中
             img.save(filename)
