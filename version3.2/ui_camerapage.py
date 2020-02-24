@@ -11,6 +11,7 @@ from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QMenu, QAction, QToolButton
 
 
+
 class Ui_CameraPage(object):
     def setupUi(self, CameraPage):
         CameraPage.setObjectName("CameraPage")
@@ -64,7 +65,7 @@ class Ui_CameraPage(object):
         self.openCameraAction = QAction("实时检测", self.menu)
         self.openCameraAction.setFont(font_2)
         self.openCameraAction.setIcon(QIcon("images/icon3.jpg"))
-        self.openCameraAction.triggered.connect(CameraPage.openCamera2)
+        self.openCameraAction.triggered.connect(CameraPage.openCamera)
 
         # 将二级菜单加入到一级菜单
         self.menu.addAction(self.openImageAction)
@@ -108,7 +109,7 @@ class Ui_CameraPage(object):
 
         self.retranslateUi(CameraPage)
         # self.toolButton_3.clicked.connect(CameraPage.collect)
-        self.toolButton_4.clicked.connect(CameraPage.face)
+        self.toolButton_4.clicked.connect(CameraPage.stopCamera)
         QtCore.QMetaObject.connectSlotsByName(CameraPage)
 
     def retranslateUi(self, CameraPage):
@@ -122,6 +123,7 @@ class Ui_CameraPage(object):
         self.toolButton.setText(_translate("CameraPage", "检测"))
         self.toolButton_2.setText(_translate("CameraPage", "历史记录"))
         self.toolButton_3.setText(_translate("CameraPage", "人脸采集"))
+        self.toolButton_4.setText(_translate("CameraPage", "关闭摄像头"))
         
 
 

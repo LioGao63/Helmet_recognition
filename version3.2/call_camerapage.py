@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from face_recog import face_rec
+from face_recog.history import mywindow
 from ui_camerapage import Ui_CameraPage
 from ui_faceCollection import Ui_faceCollection
 from PyQt5 import QtWidgets, QtCore
@@ -16,7 +17,10 @@ from sys import platform
 from models import *  # set ONNX_EXPORT in models.py
 from utils.datasets import *
 from utils.utils import *
+from face_recog import history
 
+global thread_event
+thread_event = False
 
 class CameraPageWindow(QWidget, Ui_CameraPage):
 
@@ -44,6 +48,10 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
         # self.cameraButton.clicked.connect(self.slotCameraButton)
 
     def openImage(self):
+        global thread_event
+
+        if thread_event:
+            thread_event.clear()
         try:
             fname, _ = QFileDialog.getOpenFileName(self, '打开图片', '/', 'Image files (*.jpg *.gif *.png)')
             print(fname)
@@ -70,6 +78,7 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
 
 
     def show_camera(self, imageSource='0', save_txt=False, save_img=False):
+        global thread_event
         cfg = 'cfg/yolov3_5.cfg'
         conf_thres = 0.4
         nms_thres = 0.35
@@ -120,7 +129,8 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
 
         t0 = time.time()
         t_start = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
-        for path, img, im0s, vid_cap in dataset:
+        for path, img, im0s, vid_cap, event in dataset:
+
             t = time.time()
 
             # 获取预测结果
@@ -188,6 +198,7 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
                     show = cv2.cvtColor(show, cv2.COLOR_BGR2RGB)
                     showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
                     self.cameraLabel.setPixmap(QPixmap.fromImage(showImage))
+                    thread_event = event
 
 
                 # 保存结果（图片）
@@ -253,12 +264,10 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
         self.cameraLabel.clear()
         self.cameraButton.setText('打开摄像头')
 
-    # #人脸识别模块
-    # def face(self):
-    #     face_rec.facerec()
-    #
-    # def collect(self):
-    #     face_rec.collect_face()
+    def stopCamera(self):
+        global thread_event
+        thread_event.clear()
+
 
 
 class FaceCollectionWindow(QDialog, Ui_faceCollection):
@@ -279,12 +288,11 @@ class FaceCollectionWindow(QDialog, Ui_faceCollection):
     def openImage1(self):
         global faceImageName
         try:
-
             faceImageName, _ = QFileDialog.getOpenFileName(self, '打开文件', '/', 'Image files (*.jpg *.gif *.png)')
 
             self.label.setPixmap(QPixmap(faceImageName).scaled(self.label.width(), self.label.height()))
         except:
-            self.label.setText("打开文件失败，可能是文件类型错误")
+            self.label.setText("打开文件失败，可能是文件内型错误")
 
     def submit(self):
         print(faceImageName)
@@ -303,11 +311,11 @@ class FaceCollectionWindow(QDialog, Ui_faceCollection):
             print(file_suffix)
             # 拼接图片名（包含路径）
             filename = '{}{}{}{}'.format(output_dir, os.sep, rename, file_suffix)
-            print(type(filename))
+            print(filename)
             img = self.label.pixmap().toImage()
             # 保存到文件夹中
             img.save(filename)
-            faceImageName = '0.jpg'
+
         except IOError as e:
             print("IOError")
         except Exception as e:
@@ -315,7 +323,7 @@ class FaceCollectionWindow(QDialog, Ui_faceCollection):
 
     def collect(self):
         global faceImageName
-        faceImageName  = '0.jpg'
+        faceImageName = '0.jpg'
         self.collect_face()
 
     def collect_face(self):
@@ -337,7 +345,8 @@ class FaceCollectionWindow(QDialog, Ui_faceCollection):
                 show = cv2.resize(frame, (480, 320))
                 show = cv2.cvtColor(show, cv2.COLOR_BGR2RGB)
                 showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
-                self.label.setPixmap(QPixmap.fromImage(showImage).scaled(self.label.width(), self.label.height()))
+                self.label.setPixmap(
+                    QPixmap.fromImage(showImage).scaled(self.label.width(), self.label.height()))
                 break
             if flag == 27:
                 # 按下ESC键
@@ -350,8 +359,12 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     ui = CameraPageWindow()
     faceCollection = FaceCollectionWindow()
-    btn = ui.toolButton_3
-    btn.clicked.connect(faceCollection.show)
+    btn_1 = ui.toolButton_3
+    btn_1.clicked.connect(faceCollection.show)
+
+    historyShow = mywindow()
+    btn_2 = ui.toolButton_2
+    btn_2.clicked.connect(historyShow.show)
 
     ui.show()
     sys.exit(app.exec_())
