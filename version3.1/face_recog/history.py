@@ -65,11 +65,11 @@ class Ui_TabWidget(object):
 
     def setupUi(self, TabWidget):
         TabWidget.setObjectName("TabWidget")
-        TabWidget.resize(739, 681)
+        TabWidget.resize(1080, 800)
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
         self.tableWidget = QtWidgets.QTableWidget(self.tab)
-        self.tableWidget.setGeometry(QtCore.QRect(130, 190, 391, 381))
+        self.tableWidget.setGeometry(QtCore.QRect(50, 150, 600, 500))
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.verticalHeader().setVisible(True)
@@ -80,7 +80,7 @@ class Ui_TabWidget(object):
         self.label = QLabel(self)
         self.label.setText("显示图片")
         self.label.setFixedSize(300, 200)
-        self.label.move(600, 160)
+        self.label.move(720, 250)
         self.label.setStyleSheet("QLabel{background:white;}"
                                  "QLabel{color:rgb(300,300,300,120);font-size:10px;font-weight:bold;font-family:宋体;}"
                                  )
@@ -148,6 +148,7 @@ class mywindow(QTabWidget,Ui_TabWidget):
     def __init__(self):
         super(mywindow,self).__init__()
         self.setupUi(self)
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

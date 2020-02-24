@@ -120,7 +120,6 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
 
         t0 = time.time()
         t_start = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
-
         for path, img, im0s, vid_cap in dataset:
             t = time.time()
 
@@ -214,7 +213,8 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
             if platform == 'darwin':  # MacOS
                 os.system('open ' + out + ' ' + save_path)
 
-
+        self.face = face_rec.Face_reco(t_start)
+        self.facethread = QtCore.QThread()
         self.face.moveToThread(self.facethread)
         self.face.finish_signal.connect(self.facethread.quit)
         self.facethread.started.connect(self.face.facerec_pic)
