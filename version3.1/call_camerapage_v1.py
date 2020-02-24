@@ -184,7 +184,7 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
 
                 # 结果
                 if view_img:
-                    show = cv2.resize(im0, (800, 640))
+                    show = cv2.resize(im0, (1080, 720))
                     show = cv2.cvtColor(show, cv2.COLOR_BGR2RGB)
                     showImage = QImage(show.data, show.shape[1], show.shape[0], QImage.Format_RGB888)
                     self.cameraLabel.setPixmap(QPixmap.fromImage(showImage))
@@ -348,7 +348,7 @@ class FaceCollectionWindow(QDialog, Ui_faceCollection):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    ui = CameraPageWindow()# 这是原py中的类,因人而异哦
+    ui = CameraPageWindow()
     faceCollection = FaceCollectionWindow()
     btn = ui.toolButton_3
     btn.clicked.connect(faceCollection.show)
