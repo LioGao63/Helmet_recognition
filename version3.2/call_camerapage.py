@@ -75,7 +75,10 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
     def openCamera(self):
         self.show_camera()
 
+    def showRecord(self):
 
+        self.historyShow = mywindow()
+        self.historyShow.show()
 
     def show_camera(self, imageSource='0', save_txt=False, save_img=False):
         global thread_event
@@ -129,6 +132,7 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
 
         t0 = time.time()
         t_start = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d')
+
         for path, img, im0s, vid_cap, event in dataset:
 
             t = time.time()
@@ -362,9 +366,7 @@ if __name__ == "__main__":
     btn_1 = ui.toolButton_3
     btn_1.clicked.connect(faceCollection.show)
 
-    historyShow = mywindow()
-    btn_2 = ui.toolButton_2
-    btn_2.clicked.connect(historyShow.show)
+
 
     ui.show()
     sys.exit(app.exec_())
