@@ -109,6 +109,7 @@ class Ui_CameraPage(object):
 
         self.retranslateUi(CameraPage)
         # self.toolButton_3.clicked.connect(CameraPage.collect)
+        self.toolButton_2.clicked.connect(CameraPage.showRecord)
         self.toolButton_4.clicked.connect(CameraPage.stopCamera)
         QtCore.QMetaObject.connectSlotsByName(CameraPage)
 
