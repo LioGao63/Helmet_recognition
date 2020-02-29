@@ -66,7 +66,11 @@ class Face_reco(QtCore.QObject):
         print(data_dir)
         print("开始识别")
         for i in os.listdir(data_dir):
+            if i[22:26] == 'done':
+                continue
             image_dir = pjoin(data_dir, i)
+            abs_dir = os.path.abspath(os.path.dirname(i))+'\\'+image_dir
+            print(abs_dir)
             print(image_dir)
             unknown_picture = face_recognition.load_image_file(image_dir)
             unknown_face_locations = face_recognition.face_locations(unknown_picture)
@@ -85,23 +89,25 @@ class Face_reco(QtCore.QObject):
                         name = total_image_name[i]
                         break
 
+            new_dir = abs_dir.split('.')[0]+'-done.'+abs_dir.split('.')[1]
+            os.rename(abs_dir, new_dir)
             print(name)
             with open("txt/"+self.time+"-record.text", "a") as f:
-                f.writelines("{},{}\n".format(image_dir, name))
+                f.writelines("{},{}\n".format(new_dir, name))
         print("识别完毕，开始添加记录")
         self.add_record()
 
     #添加txt当中的数据至数据库
     def add_record(self):
         self.path = "txt/"+self.time+"-record.text"
-        file = open(self.path, 'r', encoding='GBK')
+        file = open(self.path, 'r+', encoding='GBK')
         for line in file.readlines():
             curline = line.strip().split(",")
             name = curline[1]
             print(name)
             img_path = curline[0]
             print(img_path)
-            time_str = curline[0].split('\\')[2][0:19]
+            time_str = curline[0].split('\\')[-1][0:19]
             print("添加记录")
             record_time = datetime.datetime.strptime(time_str, '%Y-%m-%d-%H-%M-%S')
             if str(name) != "":
@@ -112,6 +118,10 @@ class Face_reco(QtCore.QObject):
                     cur.execute(sql, data)
                     conn.commit()
                 conn.close()
+        file.seek(0)
+        file.truncate()
+        file.close()
+        print("txt文件清空")
 
         self.finish_signal.emit()
 
