@@ -124,10 +124,8 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
             modelc.load_state_dict(torch.load('weights/resnet101.pt', map_location=device)['model'])  # load weights
             modelc.to(device).eval()
 
-        print("eval前")
         # eval模式
         model.to(device).eval()
-        print("eval后")
 
         # 数据装载
         vid_path, vid_writer = None, None
@@ -250,15 +248,18 @@ class CameraPageWindow(QWidget, Ui_CameraPage):
             print('Results saved to %s' % os.getcwd() + os.sep + out)
             if platform == 'darwin':  # MacOS
                 os.system('open ' + out + ' ' + save_path)
-
-        self.face = face_rec.Face_reco(t_start)
-        self.facethread = QtCore.QThread()
-        self.face.moveToThread(self.facethread)
-        self.face.finish_signal.connect(self.facethread.quit)
-        self.facethread.started.connect(self.face.facerec_pic)
-        self.facethread.start()
-        print("识别线程开启")
-        print('Done. (%.3fs)' % (time.time() - t0))
+        dir_path = "face_capture/" + t_start
+        if os.path.exists(dir_path):
+            self.face = face_rec.Face_reco(t_start)
+            self.facethread = QtCore.QThread()
+            self.face.moveToThread(self.facethread)
+            self.face.finish_signal.connect(self.facethread.quit)
+            self.facethread.started.connect(self.face.facerec_pic)
+            self.facethread.start()
+            print("识别线程开启")
+            print('Done. (%.3fs)' % (time.time() - t0))
+        else:
+            print("没有检测到人脸信息")
 
 
     # 打开关闭摄像头控制
